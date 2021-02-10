@@ -6,6 +6,7 @@ class AuthorizationState {}
 class LoadingState extends AuthorizationState {}
 
 class NormalState extends AuthorizationState {
+  // у стейта все поля должны быть final
   Map<SignInElements, dynamic> signInElements;
   Map<SignUpElements, dynamic> signUpElements;
 
@@ -19,14 +20,11 @@ class NormalState extends AuthorizationState {
       @required this.signUpElements,
       @required this.signInElementErrors,
       @required this.signUpElementErrors,
-      authStatus}){
+      authStatus}) {
     this.authStatus = authStatus ?? "";
   }
 }
 
-
-class Message extends AuthorizationState{
-
-}
+class Message extends AuthorizationState {}
 
 class SuccessfullyAuthorizedState extends AuthorizationState {}

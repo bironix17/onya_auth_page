@@ -11,12 +11,10 @@ import 'package:flutter_authorization/resources/app_colors.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class SignIn extends StatelessWidget {
-
   Map<SignInElements, dynamic> elementsData;
   Map<SignInElements, String> elementsErrorData;
 
   static const double horizontalPadding = 20;
-
 
   SignIn(this.elementsData, this.elementsErrorData);
 
@@ -29,9 +27,8 @@ class SignIn extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-
           Padding(
-            padding: const EdgeInsets.only(top :25),
+            padding: const EdgeInsets.only(top: 25),
             child: AuthServicesButtons(),
           ),
 
@@ -45,53 +42,68 @@ class SignIn extends StatelessWidget {
                 )),
           ),
 
-
           Padding(
-            padding: const EdgeInsets.only(top : 20),
-            child: CustomTextField(hintText: "Email",
+            padding: const EdgeInsets.only(top: 20),
+            child: CustomTextField(
+                hintText: "Email",
                 text: elementsData[SignInElements.Email],
                 errorText: elementsErrorData[SignInElements.Email],
-                callbackOnChanged: (value)=>BlocProvider.of<AuthorizationBloc>(context).add(ClickSignInElementEvent(SignInElements.Email, value))
-            ),
+                callbackOnChanged: (value) =>
+                    BlocProvider.of<AuthorizationBloc>(context).add(
+                        ClickSignInElementEvent(SignInElements.Email, value))),
           ),
 
           Padding(
-            padding: const EdgeInsets.only(top : 20),
-            child: CustomTextField( hintText: "Password",
+            padding: const EdgeInsets.only(top: 20),
+            child: CustomTextField(
+                hintText: "Password",
                 text: elementsData[SignInElements.Password],
                 errorText: elementsErrorData[SignInElements.Password],
                 isPasswordField: true,
-                callbackOnChanged: (value)=>BlocProvider.of<AuthorizationBloc>(context).add(ClickSignInElementEvent(SignInElements.Password, value))
-            ),
+                callbackOnChanged: (value) =>
+                    BlocProvider.of<AuthorizationBloc>(context).add(
+                        ClickSignInElementEvent(
+                            SignInElements.Password, value))),
           ),
 
-
           Padding(
-            padding: const EdgeInsets.only(top : 30),
+            padding: const EdgeInsets.only(top: 30),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.info, color: AppColors.primary, size: 14,),
-                  SizedBox(width: 4),
-                  Text("forgot your password?".toUpperCase(), style: TextStyle(color: AppColors.primary, fontSize: 12, fontWeight: FontWeight.bold))
+                Icon(
+                  Icons.info,
+                  color: AppColors.primary,
+                  size: 14,
+                ),
+                SizedBox(width: 4),
+                Text("forgot your password?".toUpperCase(),
+                    style: TextStyle(
+                        color: AppColors.primary,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold))
               ],
             ),
           ),
 
-          Padding(padding: EdgeInsets.only(top : 30),
-              child: CustomButton(text: "sign in", callbackOnPressed: () => BlocProvider.of<AuthorizationBloc>(context).add(SubmitSignInEvent()))),
+          Padding(
+              padding: EdgeInsets.only(top: 30),
+              child: CustomButton(
+                  text: "sign in",
+                  callbackOnPressed: () =>
+                      BlocProvider.of<AuthorizationBloc>(context)
+                          .add(SubmitSignInEvent()))),
 
-          Padding(padding: EdgeInsets.only(top : 30),
-              child: CustomButton(text: "log out", callbackOnPressed: () => BlocProvider.of<AuthorizationBloc>(context).add(SubmitLogOutEvent()))),
-
+          // в целом, все выглядит вполне неплохо, аккуратно и читабельно, но вот эту кнопку я бы показывал только в том случае, если я уже авторизован
+          Padding(
+              padding: EdgeInsets.only(top: 30),
+              child: CustomButton(
+                  text: "log out",
+                  callbackOnPressed: () =>
+                      BlocProvider.of<AuthorizationBloc>(context)
+                          .add(SubmitLogOutEvent()))),
         ],
       ),
     );
   }
-
 }
-
-
-
-
-

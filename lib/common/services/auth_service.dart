@@ -66,7 +66,6 @@ class AuthService implements AuthServiceInterface {
   }
 
   AuthStatus _processSignIn(QueryResult result, AuthProvider provider) {
-
     AuthStatus authStatus = checkAuthException(result);
 
     if (authStatus == AuthStatus.Success) {
@@ -81,7 +80,10 @@ class AuthService implements AuthServiceInterface {
   }
 
   AuthStatus checkAuthException(QueryResult result) {
+    // идея с enum'ами-статусами хорошая. Я бы еще добавил дефолтную ветку
+    // на случай, если мы знаем не все виды ошибок
 
+    // плюс ко всему, у тебя еще на телефоне может не быть инета. Эту ошибку тоже надо отлавливать
     if (result.hasException) {
       if (result.exception.graphqlErrors.isNotEmpty) {
         if (result.exception.graphqlErrors.first.raw
