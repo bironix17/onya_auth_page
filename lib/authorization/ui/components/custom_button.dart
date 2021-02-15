@@ -3,9 +3,8 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_authorization/resources/app_colors.dart';
 
 class CustomButton extends StatelessWidget {
-  // у stateless виджета поля должны быть final
-  Function callbackOnPressed;
-  String text;
+  final Function callbackOnPressed;
+  final String text;
 
   CustomButton({@required this.callbackOnPressed, @required this.text});
 
@@ -13,14 +12,13 @@ class CustomButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialButton(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 15),
+          padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 16),
           child:
-              Text(text.toUpperCase(), style: TextStyle(color: Colors.white)),
+              Text(text.toUpperCase(), style: TextStyle(color: Colors.white, fontSize: 13)),
         ),
         color: AppColors.primary,
         splashColor: AppColors.primary,
-        // не хватает еще такого свойства, т.к. в макете у кнопок тени не было
-        // elevation: 0,
+        elevation: 0,
         focusColor: AppColors.primary,
         disabledColor: AppColors.primary,
         shape: RoundedRectangleBorder(

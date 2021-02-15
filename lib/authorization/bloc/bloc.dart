@@ -1,19 +1,29 @@
 import 'package:flutter_authorization/authorization/bloc/event.dart';
 import 'package:flutter_authorization/authorization/bloc/state.dart';
-import 'package:flutter_authorization/authorization/enums.dart';
 import 'package:flutter_authorization/common/auth_repository.dart';
-import 'package:flutter_authorization/common/services/auth_service.dart';
+import 'package:flutter_authorization/resources/enums.dart';
+import 'package:flutter_authorization/resources/text_styles.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AuthorizationBloc extends Bloc<AuthorizationEvent, AuthorizationState> {
-  // эти поля - особенно если их используешь только из стейта - должны быть приватными
-  Map<SignUpElements, dynamic> signUpElementsData = {};
-  Map<SignInElements, dynamic> signInElementsData = {};
 
-  Map<SignInElements, String> signInElementErrors = {};
-  Map<SignUpElements, String> signUpElementErrors = {};
+  Map<SignUpElements, dynamic> _signUpElements = {};
+  Map<SignInElements, dynamic> _signInElements = {};
 
-  AuthRepository authRepository = AuthRepository();
+  Map<SignInElements, String> _signInElementErrors = {};
+  Map<SignUpElements, String> _signUpElementErrors = {};
+
+  final AuthRepository _authRepository = AuthRepository();
+
+  static const Map<AuthStatus, String> _authStatusMessage = {
+    AuthStatus.Failed_Email_Is_Busy : "email занят",
+    AuthStatus.Failed_Password_Error : "пароль некорректен",
+    AuthStatus.Failed_Network_Error : "нет подключения к инету",
+    AuthStatus.Failed_Login_Password_Error : "неверный логин/пароль",
+    AuthStatus.Failed_Invalid_Email : "email некорректен",
+    AuthStatus.Success : "Успешно",
+    AuthStatus.FirstSignIn : "Первый вход"
+  };
 
   AuthorizationBloc()
       : super(NormalState(
@@ -22,100 +32,82 @@ class AuthorizationBloc extends Bloc<AuthorizationEvent, AuthorizationState> {
             signInElementErrors: {},
             signUpElementErrors: {}));
 
-// этот метод тоже должен быть приватным
-// для authStatus лучше у самого стейта сделать метод copyWith,
-// а тут объявить обычный get метод. Впрочем, это вкусовщина и в таком подходе не вижу ничего плохого
-  NormalState createDefaultNormalState({String text}) => NormalState(
-      signInElements: signInElementsData,
-      signUpElements: signUpElementsData,
-      signInElementErrors: signInElementErrors,
-      signUpElementErrors: signUpElementErrors,
-      authStatus: text);
+
+  NormalState get normalState => NormalState(
+      signInElements: _signInElements,
+      signUpElements: _signUpElements,
+      signInElementErrors: _signInElementErrors,
+      signUpElementErrors: _signUpElementErrors);
+
 
   @override
   Stream<AuthorizationState> mapEventToState(AuthorizationEvent event) async* {
-    if (event is ClickSignInElementEvent) {
-      signInElementsData[event.signInElement] = event.value;
-      yield createDefaultNormalState();
-    }
 
     if (event is SubmitSignInEvent) {
-      final elementsErrors = validateSignInElements(signInElementsData);
       yield LoadingState();
 
-      if (elementsErrors.length == 0) {
-        final result = await authRepository.signIn(
-          email: signInElementsData[SignInElements.Email],
-          password: signInElementsData[SignInElements.Password],
+      _signInElements = event.elements;
+      _signInElementErrors = validateSignInElements(_signInElements);
+
+      if (_signInElementErrors.length == 0) {
+        final result = await _authRepository.signIn(
+          email: _signInElements[SignInElements.Email],
+          password: _signInElements[SignInElements.Password],
         );
 
-        signInElementErrors = elementsErrors;
+        switch(result){
+          case AuthStatus.Success :
+            yield normalState.copyWith(authStatus: _authStatusMessage[AuthStatus.Success]);
+            break;
 
-        // тоже вкусовщина, но через switch это выглядело бы приятнее (наверное)
+          case AuthStatus.Failed_Login_Password_Error :
+            yield normalState.copyWith(authStatus: _authStatusMessage[AuthStatus.Failed_Login_Password_Error]);
+            break;
+        }
 
-        // а еще лучше сделать мапу с ключем-enum'ом и значением-строкой
-        if (result == AuthStatus.Success)
-          yield createDefaultNormalState(text: "авторизированно");
-        else if (result == AuthStatus.Failed_Login_Password_Error)
-          yield createDefaultNormalState(text: "неверный логин/пароль");
-        else if (result == AuthStatus.Failed_Network_Error)
-          yield createDefaultNormalState(text: "нет подключения к инету");
       } else {
-        signInElementErrors = elementsErrors;
-        yield createDefaultNormalState();
+        yield normalState;
       }
     }
 
-// сохранять данные при каждом изменении текста. Учитывая, что ты свободно сохраняешь стейт
-// при переключении таб тебе ничего не мешает подгружать данные только при сабмите
-// а так у тебя каждый символ спамится событие и, более того, yield'ится стейт
-    if (event is ClickSignUpElementEvent) {
-      signUpElementsData[event.signUpElement] = event.value;
-      yield createDefaultNormalState();
-    }
-
-// данные стоит сохранять именно в подобных событиях
     if (event is SubmitSignUpEvent) {
-      final elementsErrors = validateSignUpElements(signUpElementsData);
-      signUpElementErrors = elementsErrors;
-
       yield LoadingState();
 
-      if (elementsErrors.length == 0) {
-        final result = await authRepository.signUp(
-          firstName: signUpElementsData[SignUpElements.FirstName],
-          lastName: signUpElementsData[SignUpElements.LastName],
-          email: signUpElementsData[SignUpElements.Email],
-          password: signUpElementsData[SignUpElements.Password],
+      _signUpElements = event.elements;
+      _signUpElementErrors = validateSignUpElements(_signUpElements);
+
+
+      if (_signUpElementErrors.length == 0) {
+        final result = await _authRepository.signUp(
+          firstName: _signUpElements[SignUpElements.FirstName],
+          lastName: _signUpElements[SignUpElements.LastName],
+          email: _signUpElements[SignUpElements.Email],
+          password: _signUpElements[SignUpElements.Password],
         );
 
         if (result == AuthStatus.Success)
-          yield createDefaultNormalState(text: "Зареганно");
+          yield normalState.copyWith(authStatus: "Зареганно");
         else if (result == AuthStatus.Failed_Email_Is_Busy)
-          yield createDefaultNormalState(text: "email занят");
+          yield normalState.copyWith(authStatus: "email занят");
         else if (result == AuthStatus.Failed_Invalid_Email)
-          yield createDefaultNormalState(text: "email некорректен");
+          yield normalState.copyWith(authStatus: "email некорректен");
         else if (result == AuthStatus.Failed_Password_Error)
-          yield createDefaultNormalState(text: "пароль некорректен");
+          yield normalState.copyWith(authStatus: "пароль некорректен");
         else if (result == AuthStatus.Failed_Network_Error)
-          yield createDefaultNormalState(text: "нет подключения к инету");
+          yield normalState.copyWith(authStatus: "нет подключения к инету");
       } else {
-        signUpElementErrors = elementsErrors;
-        yield createDefaultNormalState();
+        yield normalState;
       }
     }
 
-    if (event is SubmitLogOutEvent) {
-      yield LoadingState();
+    if (event is SocialSignInEvent)
+      print(event);
 
-      final result = await authRepository.logOut();
-
-      if (result)
-        yield createDefaultNormalState(text: "вышел");
-      else
-        yield createDefaultNormalState(text: "не вышел");
-    }
+    if (event is SocialSignUpEvent)
+      print(event);
   }
+
+
 
   bool checkTextValue(dynamic textValue) {
     if (textValue == null || textValue.toString().trim().isEmpty) return false;
@@ -126,8 +118,12 @@ class AuthorizationBloc extends Bloc<AuthorizationEvent, AuthorizationState> {
       Map<SignUpElements, dynamic> elementsData) {
     Map<SignUpElements, String> signUpFieldErrors = {};
 
-    if (!checkTextValue(elementsData[SignUpElements.Email]))
+
+    if(!RegExp(TextInputValidators.emailPattern).hasMatch(elementsData[SignUpElements.Email]))
       signUpFieldErrors[SignUpElements.Email] = "Please enter a valid email";
+
+    if (!checkTextValue(elementsData[SignUpElements.Email]))
+      signUpFieldErrors[SignUpElements.Email] = "Please enter your email address";
 
     if (!checkTextValue(elementsData[SignUpElements.FirstName]))
       signUpFieldErrors[SignUpElements.FirstName] = "Please enter a first name";
@@ -142,12 +138,16 @@ class AuthorizationBloc extends Bloc<AuthorizationEvent, AuthorizationState> {
     return signUpFieldErrors;
   }
 
+
   Map<SignInElements, String> validateSignInElements(
       Map<SignInElements, dynamic> elementsData) {
     Map<SignInElements, String> signInFieldErrors = {};
 
-    if (!checkTextValue(elementsData[SignInElements.Email]))
+    if(!RegExp(TextInputValidators.emailPattern).hasMatch(elementsData[SignInElements.Email]))
       signInFieldErrors[SignInElements.Email] = "Please enter a valid email";
+
+    if (!checkTextValue(elementsData[SignInElements.Email]))
+      signInFieldErrors[SignInElements.Email] = "Please enter your email address";
 
     if (!checkTextValue(elementsData[SignInElements.Password]))
       signInFieldErrors[SignInElements.Password] =

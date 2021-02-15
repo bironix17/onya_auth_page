@@ -1,30 +1,39 @@
 import 'package:flutter/widgets.dart';
-import 'package:flutter_authorization/authorization/enums.dart';
+import 'package:flutter_authorization/resources/enums.dart';
 
 class AuthorizationState {}
 
 class LoadingState extends AuthorizationState {}
 
 class NormalState extends AuthorizationState {
-  // у стейта все поля должны быть final
-  Map<SignInElements, dynamic> signInElements;
-  Map<SignUpElements, dynamic> signUpElements;
 
-  Map<SignInElements, String> signInElementErrors;
-  Map<SignUpElements, String> signUpElementErrors;
+  final Map<SignInElements, dynamic> signInElements;
+  final Map<SignUpElements, dynamic> signUpElements;
 
-  String authStatus;
+  final Map<SignInElements, String> signInElementErrors;
+  final Map<SignUpElements, String> signUpElementErrors;
+
+  final String authStatus;
 
   NormalState(
       {@required this.signInElements,
       @required this.signUpElements,
       @required this.signInElementErrors,
       @required this.signUpElementErrors,
-      authStatus}) {
-    this.authStatus = authStatus ?? "";
-  }
+      this.authStatus = ""});
+
+
+  NormalState copyWith({String authStatus})=> NormalState(
+      signInElements: this.signInElements,
+      signUpElements: this.signUpElements,
+      signInElementErrors: this.signInElementErrors,
+      signUpElementErrors: this.signUpElementErrors,
+      authStatus: authStatus ?? this.authStatus,
+      );
+
 }
 
-class Message extends AuthorizationState {}
 
+
+// не применяется
 class SuccessfullyAuthorizedState extends AuthorizationState {}

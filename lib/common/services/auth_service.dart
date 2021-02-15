@@ -1,6 +1,6 @@
-import 'package:flutter_authorization/common/disk.dart';
-
+import 'package:flutter_authorization/common/db.dart';
 import 'package:flutter_authorization/common/services/queries/auth_queries.dart';
+import 'package:flutter_authorization/resources/enums.dart';
 import 'package:graphql/client.dart';
 
 abstract class AuthServiceInterface {
@@ -69,8 +69,6 @@ class AuthService implements AuthServiceInterface {
     AuthStatus authStatus = checkAuthException(result);
 
     if (authStatus == AuthStatus.Success) {
-      // if (!result.hasException &&
-      //     result.data['action'].containsKey('access_token')) {
       AppStorageHive().token = result.data['action']['access_token'];
       AppStorageHive().refreshToken = result.data['action']['refresh_token'];
       AppStorageHive().email = result.data['action']['email'];
@@ -80,10 +78,7 @@ class AuthService implements AuthServiceInterface {
   }
 
   AuthStatus checkAuthException(QueryResult result) {
-    // идея с enum'ами-статусами хорошая. Я бы еще добавил дефолтную ветку
-    // на случай, если мы знаем не все виды ошибок
 
-    // плюс ко всему, у тебя еще на телефоне может не быть инета. Эту ошибку тоже надо отлавливать
     if (result.hasException) {
       if (result.exception.graphqlErrors.isNotEmpty) {
         if (result.exception.graphqlErrors.first.raw
@@ -102,6 +97,8 @@ class AuthService implements AuthServiceInterface {
             .toString()
             .contains("Incorrect username or password"))
           return AuthStatus.Failed_Login_Password_Error;
+
+        else assertWithMessage();
       }
 
       if (result.exception.clientException != null) {
@@ -109,27 +106,15 @@ class AuthService implements AuthServiceInterface {
             .toString()
             .contains("Failed host lookup"))
           return AuthStatus.Failed_Network_Error;
+        else assertWithMessage();
       }
     }
     return AuthStatus.Success;
   }
 }
 
-enum AuthStatus {
-  Failed_Email_Is_Busy,
-  Failed_Password_Error,
-  Failed_Network_Error,
-  Failed_Login_Password_Error,
-  Failed_Invalid_Email,
-  Success,
-  FirstSignIn
-}
+  void assertWithMessage(){
+    print("необработанная ошибка");
+    assert(false);
+  }
 
-enum AuthProvider {
-  Email,
-  Facebook,
-  Google,
-  Apple,
-  LinkedIn,
-  Instagram,
-}

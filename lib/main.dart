@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_authorization/authorization/ui/ui.dart';
-import 'package:flutter_authorization/common/disk.dart';
+import 'package:flutter_authorization/common/db.dart';
+import 'package:flutter_authorization/resources/app_colors.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
@@ -18,10 +19,12 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Demo',
       theme: ThemeData(
         primarySwatch: Colors.blue,
-        accentColor: Color(0xFFF8702B),
+        accentColor: AppColors.primary,
         visualDensity: VisualDensity.adaptivePlatformDensity,
+        backgroundColor: AppColors.background,
+        scaffoldBackgroundColor: AppColors.background
       ),
-      home: Authorization(),
+      home: AuthorizationPage(),
     );
   }
 }

@@ -1,7 +1,5 @@
 import 'package:hive/hive.dart';
 
-// не совсем понял, чем вызвано название этого файла. Почему не fleshka.dart или disketa.dart? :)
-
 const String _tokenKey = "token";
 const String _refreshTokenKey = "refreshToken";
 const String _userIdKey = "userId";

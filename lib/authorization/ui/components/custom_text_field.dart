@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_authorization/resources/app_colors.dart';
 import 'package:flutter_authorization/resources/app_fonts.dart';
@@ -6,38 +7,42 @@ import 'package:flutter_authorization/resources/app_fonts.dart';
 class CustomTextField extends StatefulWidget {
   final String hintText;
   final Function(String) callbackOnChanged;
-  // это поля должны быть final, т.к. не будут изменяться
-
-  // поля, подверженные изменениям, должны лежать в классе state соответствующего виджета
-  String text;
-  String errorText;
-  bool isPasswordField;
+        TextEditingController controller;
+  final String errorText;
+  final bool isPasswordField;
+  final TextInputType textInputType;
+        TextInputFormatter formatter;
 
   CustomTextField(
       {this.hintText,
+      this.textInputType = TextInputType.text,
+      this.formatter,
       this.callbackOnChanged,
-      this.text = "",
-      this.errorText = null,
-      this.isPasswordField = false});
-
+      this.errorText,
+      this.isPasswordField = false,
+      this.controller,
+      String text}){
+      if (controller == null ) controller = TextEditingController();
+      if (text != null)controller.text = text;
+      if (formatter == null)formatter = FilteringTextInputFormatter.allow(RegExp(r'.'));
+  }
   @override
   _CustomTextFieldState createState() => _CustomTextFieldState();
 }
 
+
+
 class _CustomTextFieldState extends State<CustomTextField> {
-  TextEditingController _controller;
-  bool isShowPassword = true;
+
+  static const border =  OutlineInputBorder(
+      borderSide: BorderSide(color: AppColors.backgroundGrayAccent));
+
+  bool _showText = false;
 
   @override
   void initState() {
-    _controller = TextEditingController(text: widget.text);
+    _showText = !widget.isPasswordField;
     super.initState();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
   }
 
   @override
@@ -47,35 +52,36 @@ class _CustomTextFieldState extends State<CustomTextField> {
       children: [
         SizedBox(
           child: TextField(
-            controller: _controller,
+            keyboardType: widget.textInputType,
+            controller: widget.controller,
             onChanged: widget.callbackOnChanged,
-            obscureText: !isShowPassword,
+            inputFormatters: [
+              widget.formatter,
+              if (widget.isPasswordField) FilteringTextInputFormatter.deny(' '),
+            ],
+            obscureText: !_showText,
             decoration: InputDecoration(
                 hintText: widget.hintText,
-                hintStyle: TextStyle(color: AppColors.textGhost2, fontSize: 14),
-                // я так понимаю, ты решил отключить все дефолтные декораторы
-                // уместнее было бы вынести их отдельно и проставить одно значение вместо копипасты
-                border: OutlineInputBorder(
-                    borderSide: BorderSide(color: AppColors.onBackgroundGray)),
-                enabledBorder: OutlineInputBorder(
-                    borderSide:
-                        BorderSide(color: AppColors.backgroundGrayAccent)),
-                focusedBorder: OutlineInputBorder(
-                    borderSide:
-                        BorderSide(color: AppColors.backgroundGrayAccent)),
+                border: border,
+                enabledBorder: border,
+                focusedBorder: border,
+                focusedErrorBorder: border,
+                errorBorder: border,
+                disabledBorder: border,
                 filled: true,
+                hintStyle: AppFonts.sfUiDisplayRegular.copyWith(color: Color(0x7F444444), fontSize: 14),
                 fillColor: Colors.white,
                 focusColor: Colors.white,
                 suffixIcon: widget.isPasswordField
                     ? IconButton(
                         icon: Icon(
-                            isShowPassword
+                            _showText
                                 ? Icons.visibility
                                 : Icons.visibility_off,
-                            color: AppColors.primary),
+                            color: AppColors.primary,size: 20),
                         onPressed: () {
                           setState(() {
-                            isShowPassword = !isShowPassword;
+                            _showText = !_showText;
                           });
                         },
                       )

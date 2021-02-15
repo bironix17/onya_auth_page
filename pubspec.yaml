@@ -43,6 +43,7 @@ dev_dependencies:
   graphql: ^3.1.0
 
   cupertino_icons: ^1.0.0
+  platform_action_sheet: ^0.0.3
 
 
 # For information on the generic Dart part of this file, see the
@@ -90,3 +91,4 @@ flutter:
   assets:
     - assets/fonts/
     - assets/images/
+    - assets/icons/

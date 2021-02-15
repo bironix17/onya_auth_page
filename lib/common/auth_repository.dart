@@ -1,5 +1,6 @@
 import 'package:flutter_authorization/common/graphql.dart';
 import 'package:flutter_authorization/common/services/auth_service.dart';
+import 'package:flutter_authorization/resources/enums.dart';
 
 class AuthRepository {
   AuthService _service;

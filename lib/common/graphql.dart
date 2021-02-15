@@ -1,4 +1,4 @@
-import 'package:flutter_authorization/common/disk.dart';
+import 'package:flutter_authorization/common/db.dart';
 import 'package:graphql/client.dart';
 
 const String _baseUrl = "https://api.onya.miura.tech/graphql";

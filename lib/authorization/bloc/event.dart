@@ -1,25 +1,30 @@
-import 'package:flutter_authorization/authorization/enums.dart';
+import 'package:flutter_authorization/resources/enums.dart';
 
 class AuthorizationEvent {}
 
-//class InitEvent extends AuthorizationEvent{}
+class SubmitSignInEvent extends AuthorizationEvent {
+  final Map<SignInElements, dynamic> elements ;
 
-class ClickSignInElementEvent extends AuthorizationEvent {
-  SignInElements signInElement;
-  dynamic value;
-
-  ClickSignInElementEvent(this.signInElement, [this.value = null]);
+  SubmitSignInEvent(this.elements);
 }
 
-class SubmitSignInEvent extends AuthorizationEvent {}
 
-class ClickSignUpElementEvent extends AuthorizationEvent {
-  SignUpElements signUpElement;
-  dynamic value;
 
-  ClickSignUpElementEvent(this.signUpElement, [this.value = null]);
+class SubmitSignUpEvent extends AuthorizationEvent {
+  final Map<SignUpElements, dynamic> elements ;
+
+  SubmitSignUpEvent(this.elements);
 }
 
-class SubmitSignUpEvent extends AuthorizationEvent {}
+class SocialSignInEvent extends AuthorizationEvent {
+  final AuthProvider authProvider;
 
-class SubmitLogOutEvent extends AuthorizationEvent {}
+  SocialSignInEvent(this.authProvider);
+}
+
+
+class SocialSignUpEvent extends AuthorizationEvent {
+  final AuthProvider authProvider;
+
+  SocialSignUpEvent(this.authProvider);
+}
